@@ -18,15 +18,27 @@ model User {
   email String @unique
   password String 
   message message[]
-
+  conversationsId Int[]
+  conversations conversation[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 model conversation {
   id Int @default(autoincrement()) @id
-
+  participantsId Int[]
+  participants User[]
+  message message[]
+  messageId Int[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 model message {
   id Int @default(autoincrement()) @id
   senderId Int
   sender User @relation(fields: [senderId],references: [id])
-
+  body String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  conversation conversation @relation(fields: [conversationId],references: [id])
+  conversationId Int
 }
