@@ -27,8 +27,37 @@ router.post("/usercreate", (req, res) => __awaiter(void 0, void 0, void 0, funct
     });
     res.json({ message: user });
 }));
-router.post("/messagesend", (req, res) => {
-    const { user } = req.query;
-    res.json(user);
-});
+router.post("/messagesend", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id, userId } = req.query;
+    console.log(id, userId);
+    const { body } = req.body;
+    console.log(id);
+    let conversations = yield prisma.conversation.findFirst({
+        where: {
+            participantsId: {
+                hasEvery: [Number(userId), Number(id)]
+            }
+        }
+    });
+    if (!conversations) {
+        conversations = yield prisma.conversation.create({
+            data: {
+                participantsId: {
+                    set: [Number(userId), Number(id)]
+                }
+            }
+        });
+    }
+    const message = yield prisma.message.create({
+        data: {
+            body: body,
+            conversationId: conversations.id,
+            senderId: Number(userId)
+        }
+    });
+    res.json({
+        message: message,
+        conversation: conversations,
+    });
+}));
 exports.default = router;

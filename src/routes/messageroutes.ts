@@ -1,3 +1,4 @@
+
 import express from "express"
 const router = express.Router()
 import { PrismaClient } from "@prisma/client"
@@ -15,24 +16,24 @@ router.post("/usercreate",async(req,res)=>{
     res.json({message:user})
 
 })
-interface user {
-    userId:number
-}
 
-router.post("/messagesend/:id",async(req,res)=>{
-    const {userId} = req.query
-    const id=req.params
-    const body=req.body
+
+router.post("/messagesend",async(req,res)=>{
+    const {id,userId}=req.query
+    console.log(id , userId)
     
-    let conversation =await prisma.conversation.findFirst({
+    const {body}=req.body
+    console.log(id)
+    
+    let conversations =await prisma.conversation.findFirst({
         where:{
             participantsId:{
                 hasEvery:[Number(userId),Number(id)]
             }
         }
     })
-    if(!conversation){
-         conversation= await prisma.conversation.create({
+    if(!conversations){
+         conversations= await prisma.conversation.create({
             data:{
                 participantsId:{
                     set:[Number(userId),Number(id)]
@@ -44,14 +45,14 @@ router.post("/messagesend/:id",async(req,res)=>{
     const message=await prisma.message.create({
         data:{
             body:body,
-            conversationId:conversation.id,
+            conversationId:conversations.id,
             senderId:Number(userId)
         }
     })
 
     res.json({
         message:message,
-        conversation:conversation,
+        conversation:conversations,
     })
 
 })
